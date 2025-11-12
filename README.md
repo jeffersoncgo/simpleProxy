@@ -368,5 +368,3 @@ For issues, questions, or feature requests:
 ---
 
 **Made with ❤️ | Enhanced Edition with Advanced Features**
-
-*Last Updated: January 2025*
