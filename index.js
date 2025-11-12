@@ -628,6 +628,11 @@ app.use((err, req, res, next) => {
   if (!res.headersSent) res.status(500).send('Internal Error');
 });
 
-app.listen(PROXY_PORT, '0.0.0.0', () =>
-  console.log(`✅ Proxy server running on port ${PROXY_PORT}`)
+app.listen(PROXY_PORT, '0.0.0.0', (err) => {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  } else
+    console.log(`✅ Proxy server running on port ${PROXY_PORT}`)
+}
 );
