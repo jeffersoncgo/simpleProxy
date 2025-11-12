@@ -4,194 +4,858 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Proxy Endpoint Tester</title>
+  <title>Advanced Proxy Server</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
       overflow: hidden;
+      height: 100vh;
     }
 
-    header {
-      width: 100vw;
-      display: flex;
-      align-items: start;
-      justify-content: start;
-      background-color: #fff;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    form {
-      width: 100%;
-      display: flex;
-      padding: 20px;
-      padding-bottom: 10px;
-      padding-left: 10px;
-    }
-
-    form > input[type="text"], select {
-      margin-right: 10px;
-      border-radius: 4px;
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-      font-size: 1em;
-    }
-
-    form > select {
-      margin-right: 10px;
-      border-radius: 4px;
-      width: auto;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-      font-size: 1em;
-    }
-
-    form > div {
-      min-height: 100%;
-      position: relative;
+    .container {
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      margin-bottom: 9px;
-      margin-right: 10px;
+      height: 100vh;
     }
 
+    /* Header */
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+    }
 
-    form > div > div {
-      position: relative;
+    .header-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+      margin-top: 15px;
+      margin-bottom: 15px;
       display: flex;
-      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-title::before {
+      content: '🔒';
+      font-size: 28px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
       align-items: center;
     }
 
-    form > div > div > label {
+    .btn-group button {
+      padding: 8px 20px;
+      font-size: 14px;
       white-space: nowrap;
+    }
+
+    .header-toggle {
+      text-align: center;
+      /* margin-top: 10px; */
+    }
+
+    .header-toggle button {
+      background: rgba(255, 255, 255, 0.8);
+      color: #667eea;
+      border: 1px solid #e0e0e0;
+      padding: 5px 15px;
+      border-radius: 0 0 8px 8px;
+      font-size: 13px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
+    }
+
+    .header-toggle button:hover {
+      background: rgba(255, 255, 255, 1);
+      transform: translateY(0);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    header.collapsed {
+      height: auto;
+      /* Adjust as needed to show only the toggle button */
+      overflow: hidden;
+      padding-bottom: 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    header.collapsed .header-title,
+    header.collapsed .form-group {
+      display: none;
+    }
+
+    header.collapsed .header-toggle button {
+      border-radius: 0 0 8px 8px;
+      border-top: none;
+    }
+
+    header:not(.collapsed) .header-toggle button::after {
+      content: '▲';
+    }
+
+    header.collapsed .header-toggle button::after {
+      content: '▼';
+    }
+
+    /* Form Controls */
+    .form-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      flex: 1;
+      min-width: 250px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    select,
+    textarea {
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    input[type="text"]:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      padding: 10px 0;
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
       user-select: none;
     }
 
-    button {
-      min-width: 140px;
-      max-width: 140px;
-      height: 40px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 1.2em;
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
       cursor: pointer;
     }
 
+    button {
+      padding: 12px 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
     button:hover {
-      background-color: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      padding: 8px 20px;
+      font-size: 14px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* Main Content */
+    .main-content {
+      display: flex;
+      flex: 1;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .iframe-container {
+      flex: 1;
+      position: relative;
+      background: white;
+      overflow: hidden;
     }
 
     iframe {
-      display: block;
       width: 100%;
-      height: calc(100vh - 110px);
-      margin-top: 20px;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      background-color: white;
+      height: 100%;
+      border: none;
+      background: white;
+    }
+
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.95);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 1000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 400px;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid #e0e0e0;
+      transition: width 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+      width: 0;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 2px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sidebar-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .toggle-sidebar {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 5px 10px;
+      color: #667eea;
+      box-shadow: none;
+    }
+
+    .toggle-sidebar:hover {
+      transform: none;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 5px;
+    }
+
+    .sidebar-tabs {
+      display: flex;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .sidebar-tab {
+      flex: 1;
+      padding: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+      box-shadow: none;
+    }
+
+    .sidebar-tab:hover {
+      background: rgba(102, 126, 234, 0.05);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .sidebar-tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+      background: rgba(102, 126, 234, 0.05);
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Logs */
+    .log-entry {
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      border-left: 4px solid #ccc;
+      background: #f9f9f9;
+      word-wrap: break-word;
+    }
+
+    .log-entry.success {
+      border-left-color: #4caf50;
+      background: #f1f8f4;
+    }
+
+    .log-entry.error {
+      border-left-color: #f44336;
+      background: #fef1f0;
+    }
+
+    .log-entry.pending {
+      border-left-color: #ff9800;
+      background: #fff8f0;
+    }
+
+    .log-time {
+      font-weight: 600;
+      color: #667eea;
+      margin-right: 8px;
+    }
+
+    .log-type {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-right: 8px;
+    }
+
+    .log-type.proxy {
+      background: #667eea;
+      color: white;
+    }
+
+    .log-type.flaresolverr {
+      background: #ff9800;
+      color: white;
+    }
+
+    .log-type.browser {
+      background: #4caf50;
+      color: white;
+    }
+
+    .log-url {
+      color: #333;
+      font-family: 'Courier New', monospace;
+      display: block;
+      margin-top: 5px;
+      word-break: break-all;
+    }
+
+    .log-details {
+      margin-top: 5px;
+      font-size: 11px;
+      color: #666;
+    }
+
+    .no-logs {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+
+    .clear-logs-btn {
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    /* Headers Editor */
+    .headers-editor {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .header-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .header-row input {
+      flex: 1;
+      padding: 8px;
+      font-size: 12px;
+    }
+
+    .remove-header-btn {
+      padding: 8px 12px;
+      background: #f44336;
+      font-size: 12px;
+    }
+
+    .add-header-btn {
+      margin-top: 10px;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.95);
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4caf50;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .sidebar {
+        width: 300px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .form-group {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+        max-width: 400px;
+        z-index: 200;
+        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.2);
+      }
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <form id="proxyForm">
-      <input type="text" id="urlInput" placeholder="Enter URL" value="http://google.com/">
-      <input type="text" id="queryParamsInput" placeholder="Enter query parameters">
-      <select id="endpoint">
-        <option value="proxy" method="GET">Proxy - GET</option>
-        <option value="proxy" method="POST">Proxy - POST</option>
-        <option value="browser" method="GET">Browser - GET</option>
-      </select>
-      <div>
-        <div>
-          <input type="checkbox" id="useEmptyCache" checked>
-          <label for="useEmptyCache">Use Empty Cache</label>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="header-title">Advanced Proxy Server</div>
+
+      <form id="proxyForm" onsubmit="return false;">
+        <div class="form-group">
+          <div class="input-group" style="flex: 2;">
+            <label for="urlInput">Target URL</label>
+            <input type="text" id="urlInput" placeholder="https://example.com" value="https://google.com/">
+          </div>
+
+          <div class="input-group">
+            <label for="endpoint">Endpoint</label>
+            <select id="endpoint">
+              <option value="proxy" data-method="GET">Proxy - GET</option>
+              <option value="proxy" data-method="POST">Proxy - POST</option>
+              <option value="browser" data-method="GET">Browser - GET</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <input type="checkbox" id="useCookies">
-          <label for="useCookies">Use Cookies</label>
+
+        <div class="form-group">
+          <div class="input-group" style="flex: 2;">
+            <label for="flareSolverrUrl">FlareSolverr URL (Optional)</label>
+            <input type="text" id="flareSolverrUrl" placeholder="http://localhost:8191/v1">
+          </div>
+
+          <div class="input-group">
+            <label for="queryParamsInput">Query Parameters</label>
+            <input type="text" id="queryParamsInput" placeholder="param1=value1&param2=value2">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="input-group" style="flex: 2;">
+            <label for="userAgent">User Agent (Optional)</label>
+            <input type="text" id="userAgent" placeholder="Leave empty for default Chrome user agent">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="checkbox-group">
+            <div class="checkbox-wrapper">
+              <input type="checkbox" id="useEmptyCache" checked>
+              <label for="useEmptyCache">Force Empty Cache</label>
+            </div>
+            <div class="checkbox-wrapper">
+              <input type="checkbox" id="useCookies">
+              <label for="useCookies">Use Cookies</label>
+            </div>
+          </div>
+
+          <div class="btn-group" style="margin-left: auto;">
+            <button type="button" class="btn-secondary" onclick="toggleSidebar()">📊 Logs & Tools</button>
+            <button type="button" onclick="Navigate()">🚀 Navigate</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="header-toggle" style="text-align: center; margin-top: 10px;">
+        <div class="header-toggle" style="text-align: center; margin-top: 10px;">
+          <button type="button" class="btn-secondary"
+            onclick="document.querySelector('header').classList.toggle('collapsed');"></button>
         </div>
       </div>
-      <button type="button" onclick="Navigate()">Navigate</button>
-    </form>
-  </header>
-  <iframe id="resultsFrame" seamless="seamless" frameborder="0"></iframe>
+
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="iframe-container">
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="spinner"></div>
+          <div>Loading proxied content...</div>
+        </div>
+        <iframe id="resultsFrame" seamless="seamless"></iframe>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-title">Advanced Tools</div>
+          <button class="toggle-sidebar" onclick="toggleSidebar()">✖</button>
+        </div>
+
+        <div class="sidebar-tabs">
+          <button class="sidebar-tab active" onclick="switchTab('logs')">Logs</button>
+          <button class="sidebar-tab" onclick="switchTab('headers')">Headers</button>
+          <button class="sidebar-tab" onclick="switchTab('info')">Info</button>
+        </div>
+
+        <div class="sidebar-content">
+          <!-- Logs Tab -->
+          <div class="tab-panel active" id="logsPanel">
+            <button class="btn-secondary clear-logs-btn" onclick="clearLogs()">Clear Logs</button>
+            <div id="logsContainer">
+              <div class="no-logs">No logs yet. Start navigating to see request logs.</div>
+            </div>
+          </div>
+
+          <!-- Headers Tab -->
+          <div class="tab-panel" id="headersPanel">
+            <label>Custom Headers (Coming Soon)</label>
+            <p style="color: #999; font-size: 12px; margin-top: 10px;">Custom header injection will be available in the
+              next version.</p>
+          </div>
+
+          <!-- Info Tab -->
+          <div class="tab-panel" id="infoPanel">
+            <h3 style="margin-bottom: 15px; color: #667eea;">About This Proxy</h3>
+            <div style="font-size: 13px; line-height: 1.8; color: #666;">
+              <p style="margin-bottom: 10px;"><strong>Features:</strong></p>
+              <ul style="margin-left: 20px; margin-bottom: 15px;">
+                <li>✓ Full request interception (Fetch, XHR, Images, Scripts)</li>
+                <li>✓ FlareSolverr integration for Cloudflare bypass</li>
+                <li>✓ URL rewriting for seamless navigation</li>
+                <li>✓ Real-time request logging</li>
+                <li>✓ Cookie and cache management</li>
+              </ul>
+
+              <p style="margin-bottom: 10px;"><strong>Usage:</strong></p>
+              <ul style="margin-left: 20px; margin-bottom: 15px;">
+                <li>Enter target URL and click Navigate</li>
+                <li>Enable FlareSolverr by providing its endpoint URL</li>
+                <li>All requests from the page will be proxied automatically</li>
+                <li>Monitor activity in the Logs tab</li>
+              </ul>
+
+              <p
+                style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0; font-size: 11px; color: #999;">
+                Made with ❤️ | Enhanced by E1 AI Agent
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-indicator">
+        <div class="status-dot"></div>
+        <span>Proxy Server Active</span>
+      </div>
+      <div id="statusInfo">Ready</div>
+    </div>
+  </div>
 
   <script>
     const urlInput = document.getElementById('urlInput');
+    const flareSolverrUrl = document.getElementById('flareSolverrUrl');
     const queryParamsInput = document.getElementById('queryParamsInput');
+    const userAgent = document.getElementById('userAgent');
     const endpointInput = document.getElementById('endpoint');
     const resultsFrame = document.getElementById('resultsFrame');
-    const form = document.getElementById('proxyForm');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const logsContainer = document.getElementById('logsContainer');
+    const statusInfo = document.getElementById('statusInfo');
+    const sidebar = document.getElementById('sidebar');
 
+    let logsPollingInterval = null;
 
-    resultsFrame.addEventListener('load', () => {
-  // When the iframe has finished loading, add an event listener for navigation attempts
-  // resultsFrame.contentWindow.addEventListener('navigate', (event) => {
-  //   // Check if you want to intercept the navigation (e.g., based on the URL)
-  //   if (shouldInterceptNavigation(event.destination.url)) {
-  //     // Store the URL in a variable
-  //     const navigatedUrl = event.destination.url;
-  //     console.log(`Navigated to: ${navigatedUrl}`);
+    // Toggle sidebar
+    function toggleSidebar() {
+      sidebar.classList.toggle('collapsed');
+    }
 
-  //     // Prevent the navigation
-  //     event.intercept();
-  //   }
-  // });
-});
+    // Switch tabs
+    function switchTab(tabName) {
+      document.querySelectorAll('.sidebar-tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
 
-// Example function to determine whether to intercept navigation
-function shouldInterceptNavigation(url) {
-  // Implement your logic here (e.g., check if the URL matches certain criteria)
-  return true; // Change this condition as needed
-}
+      event.target.classList.add('active');
+      document.getElementById(tabName + 'Panel').classList.add('active');
+    }
 
+    // Navigate function
     function Navigate() {
-      const url = urlInput.value;
-      let queryParams = queryParamsInput.value;
-      const endpoint = endpointInput.value;
-      const method = endpointInput.selectedOptions[0].getAttribute('method');
-      // if method is get, make the iframe src to be the url with the parameters
-      if (document.getElementById('useEmptyCache').checked)
-        queryParams += '&forceClean=true';
+      const url = urlInput.value.trim();
+      if (!url) {
+        alert('Please enter a URL');
+        return;
+      }
 
-      if (document.getElementById('useCookies').checked)
-        queryParams += '&useCookies=true';
-      
+      let queryParams = queryParamsInput.value.trim();
+      const endpoint = endpointInput.value;
+      const method = endpointInput.selectedOptions[0].getAttribute('data-method');
+
+      // Add optional parameters
+      const params = [];
+
+      if (document.getElementById('useEmptyCache').checked) {
+        params.push('forceClean=true');
+      }
+
+      if (document.getElementById('useCookies').checked) {
+        params.push('useCookies=true');
+      }
+
+      if (flareSolverrUrl.value.trim()) {
+        params.push('flareSolverrUrl=' + encodeURIComponent(flareSolverrUrl.value.trim()));
+      }
+
+      if (userAgent.value.trim()) {
+        params.push('userAgent=' + encodeURIComponent(userAgent.value.trim()));
+      }
+
+      if (queryParams) {
+        params.push(queryParams);
+      }
+
+      const finalParams = params.join('&');
+
+      // Show loading
+      loadingOverlay.classList.add('active');
+      statusInfo.textContent = 'Loading: ' + url;
+
       if (method === 'GET') {
-        resultsFrame.src = `/${endpoint}?url=${encodeURIComponent(url)}&${queryParams}`;
+        const proxyUrl = `/${endpoint}?url=${encodeURIComponent(url)}&${finalParams}`;
+        resultsFrame.src = proxyUrl;
       } else {
-        // if method is post, make a fetch request to the endpoint with the url and parameters
+        // POST method
         fetch(`/${endpoint}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            url,
-            queryParams,
+            url: url,
+            queryParams: finalParams,
           }),
         })
           .then((res) => res.text())
           .then((data) => {
             resultsFrame.srcdoc = data;
+            loadingOverlay.classList.remove('active');
+            statusInfo.textContent = 'Loaded: ' + url;
+          })
+          .catch((err) => {
+            loadingOverlay.classList.remove('active');
+            statusInfo.textContent = 'Error: ' + err.message;
+            console.error('Fetch error:', err);
           });
       }
     }
+
+    // Hide loading overlay when iframe loads
+    resultsFrame.addEventListener('load', () => {
+      loadingOverlay.classList.remove('active');
+      statusInfo.textContent = 'Loaded successfully';
+    });
+
+    // Fetch and display logs
+    async function fetchLogs() {
+      try {
+        const response = await fetch('/api/logs?limit=50');
+        const logs = await response.json();
+
+        if (logs.length === 0) {
+          logsContainer.innerHTML = '<div class="no-logs">No logs yet. Start navigating to see request logs.</div>';
+          return;
+        }
+
+        logsContainer.innerHTML = logs.map(log => {
+          const time = new Date(log.timestamp).toLocaleTimeString();
+          const statusClass = log.status === 'success' ? 'success' : (log.status === 'error' ? 'error' : 'pending');
+          const details = log.error ? `<div class="log-details">Error: ${log.error}</div>` : '';
+          const via = log.via ? `<div class="log-details">Via: ${log.via}</div>` : '';
+
+          return `
+            <div class="log-entry ${statusClass}">
+              <span class="log-time">${time}</span>
+              <span class="log-type ${log.type}">${log.type}</span>
+              <span style="color: #999;">${log.status}</span>
+              <div class="log-url">${log.url}</div>
+              ${details}${via}
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        console.error('Failed to fetch logs:', error);
+      }
+    }
+
+    // Clear logs
+    async function clearLogs() {
+      try {
+        await fetch('/api/logs/clear', { method: 'POST' });
+        logsContainer.innerHTML = '<div class="no-logs">Logs cleared.</div>';
+      } catch (error) {
+        console.error('Failed to clear logs:', error);
+      }
+    }
+
+    // Start polling logs
+    function startLogsPolling() {
+      fetchLogs();
+      logsPollingInterval = setInterval(fetchLogs, 2000);
+    }
+
+    // Initialize
+    startLogsPolling();
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        Navigate();
+      }
+      if (e.ctrlKey && e.key === 'l') {
+        e.preventDefault();
+        toggleSidebar();
+      }
+    });
   </script>
 </body>
 
