@@ -1,4 +1,4 @@
-# 🚀 Advanced Proxy Server - Enhanced Edition
+# 🚀 Simple Proxy Server
 
 A powerful, feature-rich HTTP proxy server with comprehensive request interception, FlareSolverr integration, and advanced monitoring capabilities. Built with Node.js, Express, and modern web technologies.
 
