@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proxy Endpoint Tester</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    header {
+      width: 100vw;
+      display: flex;
+      align-items: start;
+      justify-content: start;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    form {
+      width: 100%;
+      display: flex;
+      padding: 20px;
+      padding-bottom: 10px;
+      padding-left: 10px;
+    }
+
+    form > input[type="text"], select {
+      margin-right: 10px;
+      border-radius: 4px;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 1em;
+    }
+
+    form > select {
+      margin-right: 10px;
+      border-radius: 4px;
+      width: auto;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 1em;
+    }
+
+    form > div {
+      min-height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      margin-bottom: 9px;
+      margin-right: 10px;
+    }
+
+
+    form > div > div {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    form > div > div > label {
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    button {
+      min-width: 140px;
+      max-width: 140px;
+      height: 40px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: calc(100vh - 110px);
+      margin-top: 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      background-color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <form id="proxyForm">
+      <input type="text" id="urlInput" placeholder="Enter URL" value="http://google.com/">
+      <input type="text" id="queryParamsInput" placeholder="Enter query parameters">
+      <select id="endpoint">
+        <option value="proxy" method="GET">Proxy - GET</option>
+        <option value="proxy" method="POST">Proxy - POST</option>
+        <option value="browser" method="GET">Browser - GET</option>
+      </select>
+      <div>
+        <div>
+          <input type="checkbox" id="useEmptyCache" checked>
+          <label for="useEmptyCache">Use Empty Cache</label>
+        </div>
+        <div>
+          <input type="checkbox" id="useCookies">
+          <label for="useCookies">Use Cookies</label>
+        </div>
+      </div>
+      <button type="button" onclick="Navigate()">Navigate</button>
+    </form>
+  </header>
+  <iframe id="resultsFrame" seamless="seamless" frameborder="0"></iframe>
+
+  <script>
+    const urlInput = document.getElementById('urlInput');
+    const queryParamsInput = document.getElementById('queryParamsInput');
+    const endpointInput = document.getElementById('endpoint');
+    const resultsFrame = document.getElementById('resultsFrame');
+    const form = document.getElementById('proxyForm');
+
+
+    resultsFrame.addEventListener('load', () => {
+  // When the iframe has finished loading, add an event listener for navigation attempts
+  // resultsFrame.contentWindow.addEventListener('navigate', (event) => {
+  //   // Check if you want to intercept the navigation (e.g., based on the URL)
+  //   if (shouldInterceptNavigation(event.destination.url)) {
+  //     // Store the URL in a variable
+  //     const navigatedUrl = event.destination.url;
+  //     console.log(`Navigated to: ${navigatedUrl}`);
+
+  //     // Prevent the navigation
+  //     event.intercept();
+  //   }
+  // });
+});
+
+// Example function to determine whether to intercept navigation
+function shouldInterceptNavigation(url) {
+  // Implement your logic here (e.g., check if the URL matches certain criteria)
+  return true; // Change this condition as needed
+}
+
+    function Navigate() {
+      const url = urlInput.value;
+      let queryParams = queryParamsInput.value;
+      const endpoint = endpointInput.value;
+      const method = endpointInput.selectedOptions[0].getAttribute('method');
+      // if method is get, make the iframe src to be the url with the parameters
+      if (document.getElementById('useEmptyCache').checked)
+        queryParams += '&forceClean=true';
+
+      if (document.getElementById('useCookies').checked)
+        queryParams += '&useCookies=true';
+      
+      if (method === 'GET') {
+        resultsFrame.src = `/${endpoint}?url=${encodeURIComponent(url)}&${queryParams}`;
+      } else {
+        // if method is post, make a fetch request to the endpoint with the url and parameters
+        fetch(`/${endpoint}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            url,
+            queryParams,
+          }),
+        })
+          .then((res) => res.text())
+          .then((data) => {
+            resultsFrame.srcdoc = data;
+          });
+      }
+    }
+  </script>
+</body>
+
+</html>
